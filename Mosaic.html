@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Mosaic | Opportunity Engine</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.5; }
+
+    /* Navigation */
+    nav { background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .logo { font-weight: 800; font-size: 1.25rem; color: var(--primary); cursor: pointer; }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; cursor: pointer; padding: 0.5rem 0; }
+    .nav-links a.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+    .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Buttons */
+    .btn { background: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: #f1f5f9; }
+    .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
+
+    /* Landing Page */
+    .hero { text-align: center; padding: 4rem 1rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 2rem; }
+    .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+    .hero p { color: var(--text-muted); max-width: 600px; margin: 0 auto 2rem; font-size: 1.1rem; }
+
+    /* Modal / Onboarding (TikTok Style) */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--card-bg); width: 90%; max-width: 500px; border-radius: 16px; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    .chip-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0; }
+    .chip { padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; font-size: 0.9rem; user-select: none; }
+    .chip.selected { background: #eff6ff; border-color: var(--primary); color: var(--primary); font-weight: 600; }
+
+    /* MovieBox Filter Section */
+    .filter-matrix { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .filter-group label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.4rem; }
+    .filter-group select, .filter-group input { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 8px; outline: none; background: #fff; }
+
+    /* Opportunities Grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+    .star-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #cbd5e1; transition: color 0.2s; }
+    .star-btn.starred { color: #f59e0b; }
+    .badge { font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 6px; background: #f1f5f9; color: var(--text-muted); }
+    .card h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .card p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .card-footer { border-top: 1px solid var(--border); padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+
+    /* Dashboard Status Tabs */
+    .dash-tabs { display: flex; gap: 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; overflow-x: auto; }
+    .dash-tab { padding: 0.75rem 1rem; border: none; background: none; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+    .dash-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+    /* Opportunity GPS Search Panel */
+    .gps-panel { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; padding: 2.5rem; border-radius: 16px; margin-bottom: 2rem; }
+    .gps-panel h2 { margin-bottom: 0.5rem; }
+    .gps-panel p { color: #93c5fd; margin-bottom: 1.5rem; }
+    .gps-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) auto; gap: 1rem; align-items: end; }
+    .gps-form input, .gps-form select { background: white; color: var(--text); border: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="logo" onclick="switchPage('landing')">Team Mosaic</div>
+    <ul class="nav-links" id="navLinks" style="display: none;">
+      <li><a onclick="switchPage('home')" id="link-home" class="active">Discover</a></li>
+      <li><a onclick="switchPage('gps')" id="link-gps">Opportunity GPS</a></li>
+      <li><a onclick="switchPage('dashboard')" id="link-dashboard">My Dashboard (<span id="starredCount">0</span>)</a></li>
+    </ul>
+    <div>
+      <button id="authBtn" class="btn" onclick="openAuthModal()">Log In / Sign Up</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- PAGE 1: LANDING PAGE -->
+    <div id="page-landing" class="page active">
+      <div class="hero">
+        <h1>Bridge the Gap to Your Next Opportunity</h1>
+        <p>A centralized platform tailored for undergraduates to discover verified research, internships, and entry-level micro-tasks.</p>
+        <button class="btn" style="font-size: 1.1rem; padding: 0.8rem 2rem;" onclick="openAuthModal()">Get Started</button>
+      </div>
+    </div>
+
+    <!-- PAGE 2: HOME PAGE (DISCOVER & MOVIEBOX FILTERS) -->
+    <div id="page-home" class="page">
+      <h2 style="margin-bottom: 1rem;">Explore Opportunities</h2>
+      
+      <!-- MovieBox Style Filter Matrix -->
+      <div class="filter-matrix">
+        <div class="filter-group">
+          <label>Category</label>
+          <select id="filterType" onchange="applyFilters()">
+            <option value="all">All Types</option>
+            <option value="Internship">Internships</option>
+            <option value="Research">Research Programs</option>
+            <option value="Micro-task">Micro-tasks (Zero Exp)</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Application Deadline</label>
+          <select id="filterDeadline" onchange="applyFilters()">
+            <option value="all">Anytime</option>
+            <option value="30">Next 30 Days</option>
+            <option value="60">Next 60 Days</option>
+            <option value="90">Next 90 Days</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Location / Mode</label>
+          <select id="filterLocation" onchange="applyFilters()">
+            <option value="all">All Locations</option>
+            <option value="Remote">Remote</option>
+            <option value="Lagos">Lagos</option>
+            <option value="On-Campus">On-Campus</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Opportunities Feed -->
+      <div class="grid" id="opportunitiesGrid"></div>
+    </div>
+
+    <!-- PAGE 3: OPPORTUNITY GPS -->
+    <div id="page-gps" class="page">
+      <div class="gps-panel">
+        <h2>🗺️ Opportunity GPS</h2>
+        <p>Input your present location and career targets to map localized opportunities near you.</p>
+        <div class="gps-form">
+          <div class="filter-group">
+            <label style="color: #93c5fd;">Current Location</label>
+            <input type="text" id="gpsLoc" placeholder="e.g. Lagos, Ibadan, Campus" />
+          </div>
+          <div class="filter-group">
+            <label style="color: #93c5fd;">Target Domain</label>
+            <select id="gpsDomain">
+              <option value="tech">Software & Tech</option>
+              <option value="botany">Botany / Life Sciences</option>
+              <option value="finance">Finance & Business</option>
+            </select>
+          </div>
+          <button class="btn" style="background: #10b981;" onclick="runGPS Search()">Locate Pathways</button>
+        </div>
+      </div>
+      <div class="grid" id="gpsResultsGrid"></div>
+    </div>
+
+    <!-- PAGE 4: PERSONAL DASHBOARD -->
+    <div id="page-dashboard" class="page">
+      <h2 style="margin-bottom: 0.5rem;">My Opportunity Tracker</h2>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Manage your saved applications and track progress status.</p>
+
+      <div class="dash-tabs">
+        <button class="dash-tab active" onclick="switchDashTab('pending')">Bookmarked / Pending</button>
+        <button class="dash-tab" onclick="switchDashTab('ongoing')">Ongoing</button>
+        <button class="dash-tab" onclick="switchDashTab('completed')">Completed</button>
+        <button class="dash-tab" onclick="switchDashTab('rejected')">Closed / Rejected</button>
+      </div>
+
+      <div class="grid" id="dashboardGrid"></div>
+    </div>
+
+  </div>
+
+  <!-- TIKTOK-STYLE ONBOARDING MODAL -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <h2>Welcome to Mosaic 👋</h2>
+      <p style="color: var(--text-muted); margin-top: 0.25rem;">Select your interest areas to personalize your home feed (TikTok style onboarding).</p>
+
+      <div class="chip-grid">
+        <div class="chip" onclick="toggleChip(this)">Software Development</div>
+        <div class="chip" onclick="toggleChip(this)">Academic Research</div>
+        <div class="chip" onclick="toggleChip(this)">Paid Internships</div>
+        <div class="chip" onclick="toggleChip(this)">Micro-tasks (Zero Exp)</div>
+        <div class="chip" onclick="toggleChip(this)">Campus Fellowships</div>
+      </div>
+
+      <button class="btn" style="width: 100%;" onclick="completeOnboarding()">Save & Proceed to Home</button>
+    </div>
+  </div>
+
+  <script>
+    // Mock Data Store
+    const opportunities = [
+      { id: 1, title: "HNG 11.0 Software Internship", type: "Internship", location: "Remote", deadlineDays: 14, dateText: "14 days left", starred: false, status: "pending" },
+      { id: 2, title: "Botany Department Lab Assistant", type: "Research", location: "On-Campus", deadlineDays: 45, dateText: "45 days left", starred: false, status: "pending" },
+      { id: 3, title: "Landing Page UI Audit Micro-Task", type: "Micro-task", location: "Remote", deadlineDays: 5, dateText: "5 days left", starred: false, status: "pending" },
+      { id: 4, title: "FinTech Product Research Fellow", type: "Internship", location: "Lagos", deadlineDays: 60, dateText: "60 days left", starred: false, status: "pending" }
+    ];
+
+    let isLoggedIn = false;
+    let currentDashStatus = 'pending';
+
+    // Page Switching
+    function switchPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+      
+      document.getElementById(`page-${pageId}`).classList.add('active');
+      const activeLink = document.getElementById(`link-${pageId}`);
+      if(activeLink) activeLink.classList.add('active');
+
+      if(pageId === 'home') renderHomeFeed();
+      if(pageId === 'dashboard') renderDashboard();
+    }
+
+    // Modal Control
+    function openAuthModal() {
+      document.getElementById('authModal').classList.add('active');
+    }
+
+    function toggleChip(el) {
+      el.classList.toggle('selected');
+    }
+
+    function completeOnboarding() {
+      isLoggedIn = true;
+      document.getElementById('authModal').classList.remove('active');
+      document.getElementById('navLinks').style.display = 'flex';
+      document.getElementById('authBtn').innerText = 'My Profile';
+      switchPage('home');
+    }
+
+    // Render Home Feed with MovieBox Filters
+    function renderHomeFeed() {
+      const grid = document.getElementById('opportunitiesGrid');
+      grid.innerHTML = '';
+      
+      const type = document.getElementById('filterType').value;
+      const deadline = document.getElementById('filterDeadline').value;
+      const location = document.getElementById('filterLocation').value;
+
+      const filtered = opportunities.filter(item => {
+        const matchesType = type === 'all' || item.type === type;
+        const matchesLoc = location === 'all' || item.location === location;
+        const matchesDeadline = deadline === 'all' || item.deadlineDays <= parseInt(deadline);
+        return matchesType && matchesLoc && matchesDeadline;
+      });
+
+      filtered.forEach(item => {
+        grid.innerHTML += `
+          <div class="card">
+            <div>
+              <div class="card-header">
+                <span class="badge">${item.type}</span>
+                <button class="star-btn ${item.starred ? 'starred' : ''}" onclick="toggleStar(${item.id})">★</button>
+              </div>
+              <h3>${item.title}</h3>
+              <p>Location: ${item.location}</p>
+            </div>
+            <div class="card-footer">
+              <span>Deadline: ${item.dateText}</span>
+              <button class="btn btn-sm btn-outline" onclick="toggleStar(${item.id})">${item.starred ? 'Bookmarked' : 'Bookmark'}</button>
+            </div>
+          </div>
+        `;
+      });
+      updateStarCount();
+    }
+
+    function applyFilters() { renderHomeFeed(); }
+
+    // Bookmark/Star Logic
+    function toggleStar(id) {
+      const item = opportunities.find(o => o.id === id);
+      if(item) {
+        item.starred = !item.starred;
+        renderHomeFeed();
+        if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+      }
+    }
+
+    function updateStarCount() {
+      const count = opportunities.filter(o => o.starred).length;
+      document.getElementById('starredCount').innerText = count;
+    }
+
+    // Dashboard Engine
+    function switchDashTab(status) {
+      currentDashStatus = status;
+      document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      const grid = document.getElementById('dashboardGrid');
+      grid.innerHTML = '';
+
+      const starredItems = opportunities.filter(o => o.starred && o.status === currentDashStatus);
+
+      if(starredItems.length === 0) {
+        grid.innerHTML = `<p style="color: var(--text-muted); grid-column: 1/-1;">No opportunities currently in this status tab.</p>`;
+        return;
+      }
+
+      starredItems.forEach(item => {
+        grid.innerHTML += `
+          <div class="card">
+            <div>
+              <div class="card-header">
+                <span class="badge">${item.type}</span>
+                <span style="font-size:0.8rem; font-weight:bold; color: var(--primary);">${item.status.toUpperCase()}</span>
+              </div>
+              <h3>${item.title}</h3>
+              <p>Location: ${item.location}</p>
+            </div>
+            <div class="card-footer" style="flex-direction: column; gap: 0.5rem; align-items: stretch;">
+              <a href="#" class="btn btn-sm" style="text-align:center; text-decoration:none;">Direct Apply ↗</a>
+              ${item.status === 'pending' ? `<button class="btn btn-sm btn-outline" style="border-color: var(--success); color: var(--success);" onclick="updateStatus(${item.id}, 'completed')">Mark as Completed ✓</button>` : ''}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function updateStatus(id, newStatus) {
+      const item = opportunities.find(o => o.id === id);
+      if(item) {
+        item.status = newStatus;
+        renderDashboard();
+      }
+    }
+
+    // GPS Engine Mock
+    function runGPS Search() {
+      const grid = document.getElementById('gpsResultsGrid');
+      grid.innerHTML = `
+        <div class="card" style="grid-column: 1/-1;">
+          <h3>📍 Micro-Pathway Found near your query</h3>
+          <p>Matched 2 verified local entry-level opportunities aligned with your current region.</p>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
